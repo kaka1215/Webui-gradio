@@ -622,121 +622,228 @@ with gr.Blocks() as demo:
             outputs=[inter_output, inter_result_json, inter_result_preview, inter_result_file]  # ← 日志 + 三件套
         )
 
+
+    # 仅本模块用到的 attack_kwargs 预设（内置，不暴露 UI）
+    ATK_KW_PRESETS = {
+    }
+
+
+    def _auto_attack_eval_type(dataset_name: str) -> str:
+        return "acc" if str(dataset_name).strip() == "RSICDObject" else "null"
+
+
+    def _auto_attack_kwargs(attack: str, dataset_name: str):
+        """返回 Python 对象（None 或 dict），供 yaml.dump；不返回字符串。"""
+        return ATK_KW_PRESETS.get(str(attack).strip(), {}).get(str(dataset_name).strip())
+
+
     # === 抗攻击性评测 ===
     gr.Markdown("## 抗攻击性评测任务")
 
     with gr.Accordion("运行抗攻击性评测任务", open=False):
+        # 任务 / 数据集 / 推荐搭配（与前面一致）
         with gr.Row():
-            atk_dataset = gr.Textbox(label="数据集名称", value="RSICDObject")
-            atk_dataset_type = gr.Textbox(label="数据集类型", value="null")
+            atk_task = gr.Dropdown(label="任务", choices=list(CONFIG_MATRIX.keys()), interactive=True)
+            atk_dataset = gr.Dropdown(label="数据集", choices=[], interactive=True)
+            atk_scheme = gr.Dropdown(label="推荐搭配", choices=[], interactive=True)
+
+        with gr.Row():
+            atk_infer_type = gr.Textbox(label="推理类型", interactive=False)
+            atk_eval_type = gr.Textbox(label="评测类型", interactive=False)
+        atk_allow_custom = gr.Checkbox(label="允许自定义 infer/eval（非特殊任务）", value=False)
+
         with gr.Row():
             atk_model = gr.Textbox(label="模型名称", value="qwen-vl")
             atk_port = gr.Textbox(label="模型端口", value="3000")
-        atk_output_dir = gr.Textbox(label="输出目录",
-                                    value="/path/to/output")
+
+        atk_output_dir = gr.Textbox(label="输出目录", value="/path/to/output")
+
+        # 攻击方式（用已部署的名称）
+        _atk_choices_base = []
+        if "ATTACK_SCRIPTS_MAP" in globals() and isinstance(ATTACK_SCRIPTS_MAP, dict):
+            _atk_choices_base = list(ATTACK_SCRIPTS_MAP.keys())
+        essential_attacks = ["SSA_CWA_untarget", "SSA_CWA_target"]
+        ATTACK_CHOICES = sorted(set(_atk_choices_base + essential_attacks))
 
         with gr.Row():
-            atk_infer_type = gr.Textbox(label="推理类型", value="object_eval")
-            atk_eval_type = gr.Textbox(label="评测类型", value="object_eval")
+            atk_attack = gr.Dropdown(label="攻击方式", choices=ATTACK_CHOICES, value="SSA_CWA_untarget",
+                                     interactive=True)
+            atk_attack_metric = gr.Textbox(label="攻击评测指标（自动）", value="", interactive=False,
+                                           info="RSICDObject=acc，其余=null")
+
+        # 仅 RSICDObject 需要代理 & key
         with gr.Row():
-            atk_attack = gr.Textbox(label="攻击方式", value="SSA_CWA_untarget")
-            atk_attack_eval_type = gr.Textbox(label="攻击评测指标", value="acc")
+            atk_http_proxy = gr.Textbox(label="http_proxy（仅 RSICDObject）", value="", visible=False)
+            atk_https_proxy = gr.Textbox(label="https_proxy（仅 RSICDObject）", value="", visible=False)
+            atk_key = gr.Textbox(label="评估模型 key（仅 RSICDObject）", value="", visible=False)
 
-        atk_attack_kwargs = gr.Textbox(label="攻击参数 attack_kwargs", value="None")
-
-        with gr.Row():
-            atk_http_proxy = gr.Textbox(label="http_proxy", value="")
-            atk_https_proxy = gr.Textbox(label="https_proxy", value="")
-
-        atk_key = gr.Textbox(label="密钥 key", value="123")
         atk_gpu = gr.Textbox(label="GPU 编号", value="0")
 
-        atk_button = gr.Button("运行抗攻击性评测")
-        atk_output = gr.Textbox(label="评测输出", lines=20)
+        atk_button = gr.Button("运行抗攻击性评测", variant="primary")
+        atk_output = gr.Textbox(label="评测输出", lines=20, show_copy_button=True)
+        atk_result_json = gr.JSON(label="评测结果（≤2MB 自动展示）", visible=False)
+        atk_result_preview = gr.Code(label="结果预览（大文件截断）", language="json", visible=False)
+        atk_result_file = gr.File(label="下载完整结果", visible=False)
+
+        # ---- 联动（与前面一致）----
+        atk_task.change(
+            _on_task_change, inputs=atk_task,
+            outputs=[atk_dataset, atk_scheme, atk_infer_type, atk_eval_type, atk_allow_custom],
+            queue=False
+        )
+        atk_dataset.change(
+            _on_dataset_change, inputs=[atk_task, atk_dataset],
+            outputs=[atk_scheme, atk_infer_type, atk_eval_type], queue=False
+        )
+        atk_scheme.change(
+            _on_scheme_change, inputs=[atk_task, atk_dataset, atk_scheme],
+            outputs=[atk_infer_type, atk_eval_type], queue=False
+        )
+        atk_allow_custom.change(
+            _toggle_custom, inputs=[atk_allow_custom, atk_task, atk_dataset, atk_scheme],
+            outputs=[atk_infer_type, atk_eval_type], queue=False
+        )
 
 
+        # 数据集或攻击方式变化时：自动更新“攻击评测指标”、代理/key可见性
+        def _atk_update_by_ds_or_attack(dataset, attack):
+            metric = _auto_attack_eval_type(dataset)
+            show = (str(dataset).strip() == "RSICDObject")
+            return (
+                gr.update(value=metric),  # atk_attack_metric
+                gr.update(visible=show,
+                          value="" if not show else atk_http_proxy.value if hasattr(atk_http_proxy, "value") else ""),
+                gr.update(visible=show,
+                          value="" if not show else atk_https_proxy.value if hasattr(atk_https_proxy, "value") else ""),
+                gr.update(visible=show, value="" if not show else atk_key.value if hasattr(atk_key, "value") else "")
+            )
+
+
+        atk_dataset.change(_atk_update_by_ds_or_attack, inputs=[atk_dataset, atk_attack],
+                           outputs=[atk_attack_metric, atk_http_proxy, atk_https_proxy, atk_key], queue=False)
+        atk_attack.change(_atk_update_by_ds_or_attack, inputs=[atk_dataset, atk_attack],
+                          outputs=[atk_attack_metric, atk_http_proxy, atk_https_proxy, atk_key], queue=False)
+
+
+        # ---- 运行（内置 attack_kwargs + 流式 + 结果抓取 + 大文件处理）----
         def run_attack_eval(
-                dataset_name, dataset_type,
-                model_name, port,
-                output_dir,
-                infer_type, eval_type,
-                attack, attack_eval_type,
-                http_proxy, https_proxy,
-                attack_kwargs,
-                key, gpu):
+                task, dataset, scheme_label, infer_type, eval_type, allow_custom,
+                model_name, port, output_dir,
+                attack, http_proxy, https_proxy, key, gpu
+        ):
+            import time, os, json, yaml
+            # 合法性校验（固定模式）
+            if not validate_combo(task, dataset, scheme_label, infer_type, eval_type, allow_custom):
+                return (
+                    "❌ 评测参数无效，请检查选择。",
+                    gr.update(visible=False), gr.update(visible=False), gr.update(visible=False)
+                )
 
-            # 解析 attack_kwargs（支持 None 或 JSON）
-            try:
-                atk_kwargs_parsed = None if attack_kwargs.strip() in ["None", "null", ""] else yaml.safe_load(
-                    attack_kwargs)
-            except Exception:
-                atk_kwargs_parsed = None
+            # 固定：dataset_type=None；model.keys=[]
+            ds_type = None
+            model_keys = []
 
-            config = {
-                "data": [{
-                    "dataset_name": dataset_name,
-                    "type": None if dataset_type == "null" else dataset_type
-                }],
-                "model": {
-                    "model_name": model_name,
-                    "port": int(port),
-                    "keys": [key] if key else []
-                },
-                "output": {
-                    "output_dir": output_dir
-                },
-                "evaluate": [{
-                    "infer_type": infer_type,
-                    "eval_type": eval_type,
-                    "keys": [key] if key else [],
-                    "proxy": {
-                        "http_proxy": http_proxy,
-                        "https_proxy": https_proxy
-                    },
-                    "attack": attack,
-                    "attack_kwargs": atk_kwargs_parsed,
-                    "attack_eval_type": attack_eval_type
-                }]
-            }
+            # 攻击评测指标 & 代理/key（仅 RSICDObject）
+            attack_eval_type = _auto_attack_eval_type(dataset)
+            use_proxy = (str(dataset).strip() == "RSICDObject")
+            http_proxy = http_proxy if use_proxy else ""
+            https_proxy = https_proxy if use_proxy else ""
+            eval_keys = [key] if use_proxy and key else []
+
+            # 内置 attack_kwargs
+            atk_kwargs_obj = _auto_attack_kwargs(attack, dataset)  # None 或 dict
 
             try:
+                start_ts = time.time()
+
+                config = {
+                    "data": [{"dataset_name": dataset, "type": ds_type}],
+                    "model": {"model_name": model_name, "port": int(port), "keys": model_keys},
+                    "output": {"output_dir": output_dir},
+                    "evaluate": [{
+                        "infer_type": infer_type,
+                        "eval_type": eval_type,
+                        "keys": eval_keys,  # 与 model.keys 不同
+                        "proxy": {"http_proxy": http_proxy, "https_proxy": https_proxy},
+                        "attack": attack,
+                        "attack_kwargs": atk_kwargs_obj,  # 直接是对象，yaml.dump 会写正确结构或 null
+                        "attack_eval_type": (attack_eval_type if attack_eval_type != "null" else None),
+                    }]
+                }
+
                 with NamedTemporaryFile(mode="w+", suffix=".yaml", delete=False) as temp_config:
-                    yaml.dump(config, temp_config)
+                    yaml.dump(config, temp_config, allow_unicode=True, sort_keys=False)
                     temp_config_path = temp_config.name
 
-                command = ()
+                command = (
+                )
 
                 process = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
                                            text=True)
-                output_lines = []
+
+                # 起始提示：顺便回显我们最终使用的 attack_kwargs（只打印一行概览）
+                kw_preview = "None" if atk_kwargs_obj is None else yaml.safe_dump(atk_kwargs_obj, allow_unicode=True,
+                                                                                  sort_keys=False).strip().replace("\n",
+                                                                                                                   " ")
+                output_lines = [
+                    f"启动抗攻击性评测：dataset={dataset}, attack={attack}, attack_eval_type={attack_eval_type}, kwargs={kw_preview}"]
+                yield "\n".join(output_lines), gr.update(), gr.update(), gr.update()
+
                 for line in iter(process.stdout.readline, ''):
-                    output_lines.append(line.strip())
-                    yield "\n".join(output_lines)
+                    output_lines.append(line.rstrip("\n"))
+                    yield "\n".join(output_lines), gr.update(), gr.update(), gr.update()
 
                 process.wait()
+
                 if process.returncode == 0:
-                    yield "✅ 抗攻击性评测完成"
+                    json_path = locate_result_json(
+                        "attack",
+                        output_dir=output_dir,
+                        model_name=model_name,
+                        dataset=dataset,
+                        start_ts=start_ts,
+                        attack=attack
+                    )
+                    if json_path and os.path.exists(json_path):
+                        size = os.path.getsize(json_path)
+                        if size <= MAX_JSON_BYTES:
+                            with open(json_path, "r", encoding="utf-8") as f:
+                                data = json.load(f)
+                            output_lines.append(f"✅ 完成，结果文件：{json_path}（{_fmt_size(size)}）")
+                            yield "\n".join(output_lines), gr.update(value=data, visible=True), gr.update(
+                                visible=False), gr.update(value=json_path, visible=True)
+                        else:
+                            preview, _ = build_json_preview_from_file(json_path)
+                            output_lines.append(f"✅ 完成，结果较大（{_fmt_size(size)}），显示预览并提供下载")
+                            yield "\n".join(output_lines), gr.update(visible=False), gr.update(value=preview,
+                                                                                               visible=True), gr.update(
+                                value=json_path, visible=True)
+                    else:
+                        output_lines.append(
+                            "⚠️ 完成，但未找到结果 JSON（请检查 RESULT_PATTERNS['attack'] 与命名/大小写）。")
+                        yield "\n".join(output_lines), gr.update(visible=False), gr.update(visible=False), gr.update(
+                            visible=False)
                 else:
-                    yield "❌ 评测失败，请检查日志"
+                    output_lines.append("❌ 评测失败，请检查日志")
+                    yield "\n".join(output_lines), gr.update(visible=False), gr.update(visible=False), gr.update(
+                        visible=False)
 
             except Exception as e:
-                yield f"❌ 运行失败: {str(e)}"
+                return f"❌ 运行失败: {str(e)}", gr.update(visible=False), gr.update(visible=False), gr.update(
+                    visible=False)
 
 
         atk_button.click(
-            fn=run_attack_eval,
+            run_attack_eval,
             inputs=[
-                atk_dataset, atk_dataset_type,
-                atk_model, atk_port,
-                atk_output_dir,
-                atk_infer_type, atk_eval_type,
-                atk_attack, atk_attack_eval_type,
-                atk_http_proxy, atk_https_proxy,
-                atk_attack_kwargs,
-                atk_key, atk_gpu
+                atk_task, atk_dataset, atk_scheme, atk_infer_type, atk_eval_type, atk_allow_custom,
+                atk_model, atk_port, atk_output_dir,
+                atk_attack, atk_http_proxy, atk_https_proxy, atk_key, atk_gpu
             ],
-            outputs=atk_output
+            outputs=[atk_output, atk_result_json, atk_result_preview, atk_result_file]
         )
+
+
 
     # === 范化性评测 ===
     gr.Markdown("## 泛化性评测任务")
