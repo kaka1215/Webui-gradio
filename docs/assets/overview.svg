@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="600" viewBox="0 0 1440 600" role="img" aria-labelledby="title desc">
+<title id="title">Multimodal Evaluation WebUI</title>
+<desc id="desc">A Gradio interface for six evaluation dimensions, connected to external model services and evaluation scripts.</desc>
+<rect width="1440" height="600" rx="24" fill="#101e32"/>
+<rect x="44" y="52" width="5" height="37" rx="2.5" fill="#47d7b4"/>
+<g font-family="Inter, Segoe UI, Arial, sans-serif">
+<text x="67" y="78" fill="#47d7b4" font-size="18" font-weight="700" letter-spacing="2">GRADIO WORKSPACE</text>
+<text x="44" y="170" fill="#f6f8fc" font-size="45" font-weight="700">Multimodal</text>
+<text x="44" y="226" fill="#f6f8fc" font-size="45" font-weight="700">Evaluation WebUI</text>
+<text x="46" y="285" fill="#b7c5d8" font-size="22">Configure services.</text>
+<text x="46" y="322" fill="#b7c5d8" font-size="22">Coordinate evaluations.</text>
+<text x="46" y="359" fill="#b7c5d8" font-size="22">Inspect logs and results.</text>
+<text x="46" y="420" fill="#7e93ae" font-size="16">UI + orchestration · External backend</text>
+<rect x="550" y="56" width="402" height="106" rx="12" fill="#1a2d46" stroke="#30445e"/>
+<text x="570" y="87" fill="#47d7b4" font-size="14" font-weight="700">01</text>
+<text x="606" y="90" fill="#f6f8fc" font-size="24" font-weight="600">Accuracy</text>
+<text x="570" y="130" fill="#b7c5d8" font-size="17">Task and dataset configuration</text>
+<rect x="978" y="56" width="402" height="106" rx="12" fill="#1a2d46" stroke="#30445e"/>
+<text x="998" y="87" fill="#47d7b4" font-size="14" font-weight="700">02</text>
+<text x="1034" y="90" fill="#f6f8fc" font-size="24" font-weight="600">Interference</text>
+<text x="998" y="130" fill="#b7c5d8" font-size="17">Noise, blur, JPEG and resize</text>
+<rect x="550" y="182" width="402" height="106" rx="12" fill="#1a2d46" stroke="#30445e"/>
+<text x="570" y="213" fill="#47d7b4" font-size="14" font-weight="700">03</text>
+<text x="606" y="216" fill="#f6f8fc" font-size="24" font-weight="600">Adversarial</text>
+<text x="570" y="256" fill="#b7c5d8" font-size="17">Attack and metric settings</text>
+<rect x="978" y="182" width="402" height="106" rx="12" fill="#1a2d46" stroke="#30445e"/>
+<text x="998" y="213" fill="#47d7b4" font-size="14" font-weight="700">04</text>
+<text x="1034" y="216" fill="#f6f8fc" font-size="24" font-weight="600">Generalization</text>
+<text x="998" y="256" fill="#b7c5d8" font-size="17">Cross-dataset configurations</text>
+<rect x="550" y="308" width="402" height="106" rx="12" fill="#1a2d46" stroke="#30445e"/>
+<text x="570" y="339" fill="#47d7b4" font-size="14" font-weight="700">05</text>
+<text x="606" y="342" fill="#f6f8fc" font-size="24" font-weight="600">Efficiency</text>
+<text x="570" y="382" fill="#b7c5d8" font-size="17">Runtime evaluation settings</text>
+<rect x="978" y="308" width="402" height="106" rx="12" fill="#1a2d46" stroke="#30445e"/>
+<text x="998" y="339" fill="#47d7b4" font-size="14" font-weight="700">06</text>
+<text x="1034" y="342" fill="#f6f8fc" font-size="24" font-weight="600">Defense</text>
+<text x="998" y="382" fill="#b7c5d8" font-size="17">Defense and auxiliary services</text>
+<path d="M44 470H1396" stroke="#30445e"/>
+<text x="48" y="537" fill="#d5e0ee" font-size="18" font-weight="600" letter-spacing="1">MODEL SERVICES</text>
+<text x="407" y="537" fill="#d5e0ee" font-size="18" font-weight="600" letter-spacing="1">YAML CONFIG</text>
+<text x="718" y="537" fill="#d5e0ee" font-size="18" font-weight="600" letter-spacing="1">EVALUATION BACKEND</text>
+<text x="1160" y="537" fill="#d5e0ee" font-size="18" font-weight="600" letter-spacing="1">LOGS / JSON</text>
+<path d="M320 530H350m-7-6 7 6-7 6" fill="none" stroke="#47d7b4" stroke-width="2"/>
+<path d="M626 530H656m-7-6 7 6-7 6" fill="none" stroke="#47d7b4" stroke-width="2"/>
+<path d="M1061 530H1091m-7-6 7 6-7 6" fill="none" stroke="#47d7b4" stroke-width="2"/>
+</g></svg>

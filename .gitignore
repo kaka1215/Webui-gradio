@@ -1,0 +1,16 @@
+.DS_Store
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.env
+.env.*
+*.local.yaml
+*.local.yml
+*.log
+/outputs/
+/results/
+/checkpoints/
+/configs/local.yaml
+/configs/local.yml
+.ruff_cache/

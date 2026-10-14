@@ -1,0 +1,34 @@
+# Copy to local.yaml. Paths are relative to this configuration file.
+models: {}
+attacks: {}
+
+# Illustrative backend identifiers; replace with your own registry entries.
+tasks:
+  Object recognition:
+    RSICDObject:
+      - label: Object evaluation
+        infer: object_eval
+        eval: object_eval
+        locked: false
+
+evaluations:
+  accuracy:
+    command: []
+    results: []
+  interference:
+    command: []
+    results: []
+  attack:
+    command: []
+    results: []
+  generalization:
+    command: []
+    results: []
+  efficiency:
+    command: []
+    results: []
+  defense:
+    command: []
+    results: []
+
+attack_presets: {}
