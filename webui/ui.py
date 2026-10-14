@@ -260,13 +260,11 @@ def _service_panel(settings, group, index=0):
 def build_ui(settings: Settings | None = None) -> gr.Blocks:
     settings = settings or Settings()
     with gr.Blocks(
-        title="Multimodal Evaluation WebUI",
+        title="EvalDeck",
         theme=gr.themes.Soft(primary_hue="teal", neutral_hue="slate"),
         delete_cache=(3600, 86400),
     ) as demo:
-        gr.Markdown(
-            "# Multimodal Evaluation WebUI\n模型服务管理 · 六维评测 · 配置预览 · 实时日志与结果"
-        )
+        gr.Markdown("# EvalDeck\n模型服务管理 · 六维评测 · 配置预览 · 实时日志与结果")
         if not settings.evaluations:
             gr.Markdown(
                 "**开始使用：** 界面已就绪。复制 `configs/example.yaml` 为本地配置，填写后端信息后使用 `python app.py --config configs/local.yaml` 启动。"

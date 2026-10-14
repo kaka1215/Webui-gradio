@@ -1,8 +1,10 @@
 <div align="center">
 
-# Multimodal Evaluation WebUI
+# EvalDeck
 
-**一个工作台，管理模型服务与六类多模态评测。**
+**多模态模型评测工作台**
+
+一个界面，管理模型服务与六类评测。
 
 [![Python](https://img.shields.io/badge/Python-3.10%2B-3776AB?logo=python&logoColor=white)](#快速开始)
 [![Gradio](https://img.shields.io/badge/Gradio-5.x-F97316)](https://github.com/gradio-app/gradio)
@@ -54,8 +56,8 @@
 使用 Python 3.10 或更高版本：
 
 ```bash
-git clone https://github.com/kaka1215/Webui-gradio.git
-cd Webui-gradio
+git clone https://github.com/kaka1215/EvalDeck.git
+cd EvalDeck
 python -m venv .venv
 source .venv/bin/activate
 python -m pip install -r requirements.txt
@@ -76,7 +78,7 @@ python app.py --config configs/local.yaml --port 7980
 ## 代码结构
 
 ```text
-Webui-gradio/
+EvalDeck/
 ├── app.py                  # 命令行入口
 ├── configs/example.yaml    # 部署配置模板
 ├── webui/
@@ -105,4 +107,4 @@ python app.py --config configs/example.yaml --check-config
 
 ## 许可证
 
-[MIT](LICENSE) · Copyright © 2025 Yucheng LI.
+[MIT](LICENSE)

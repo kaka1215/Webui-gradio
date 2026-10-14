@@ -1,8 +1,10 @@
 <div align="center">
 
-# Multimodal Evaluation WebUI
+# EvalDeck
 
-**One workspace for model services and six dimensions of multimodal evaluation.**
+**Multimodal Evaluation Workspace**
+
+Model services and six evaluation dimensions, in one place.
 
 [![Python](https://img.shields.io/badge/Python-3.10%2B-3776AB?logo=python&logoColor=white)](#quick-start)
 [![Gradio](https://img.shields.io/badge/Gradio-5.x-F97316)](https://github.com/gradio-app/gradio)
@@ -54,8 +56,8 @@ The screenshot shows configuration preview with the example task registry; no be
 Use Python 3.10 or newer:
 
 ```bash
-git clone https://github.com/kaka1215/Webui-gradio.git
-cd Webui-gradio
+git clone https://github.com/kaka1215/EvalDeck.git
+cd EvalDeck
 python -m venv .venv
 source .venv/bin/activate
 python -m pip install -r requirements.txt
@@ -87,7 +89,7 @@ flowchart LR
 ## Repository layout
 
 ```text
-Webui-gradio/
+EvalDeck/
 ├── app.py                  # CLI entry point
 ├── configs/example.yaml    # Deployment template
 ├── webui/
@@ -116,4 +118,4 @@ The application binds to localhost by default. GPU service launchers target Linu
 
 ## License
 
-[MIT](LICENSE) · Copyright © 2025 Yucheng LI.
+[MIT](LICENSE)

@@ -10,7 +10,7 @@ from webui.processes import processes
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Multimodal Evaluation WebUI")
+    parser = argparse.ArgumentParser(description="EvalDeck — Multimodal Evaluation Workspace")
     parser.add_argument("--config", help="Path to a deployment YAML file")
     parser.add_argument("--host", default="127.0.0.1", help="Bind address (default: local only)")
     parser.add_argument("--port", type=int, default=7980)
