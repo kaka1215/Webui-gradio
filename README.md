@@ -18,7 +18,7 @@ Configure model services, prepare evaluation requests, stream backend output, an
 
 This repository contains the **interface and orchestration layer**. Connect your own evaluation backend, model weights, datasets, and attack implementations.
 
-![Six evaluation dimensions and their workflow](docs/assets/overview.svg)
+![Six evaluation dimensions and their workflow](docs/assets/evaldeck-overview.svg)
 
 ## Six evaluation dimensions
 
@@ -45,7 +45,7 @@ Metrics and transformations are implemented by the connected backend.
 <details open>
 <summary>Interface preview</summary>
 
-![Evaluation workspace](docs/assets/evaluation.png)
+![Evaluation workspace](docs/assets/evaldeck-workspace.png)
 
 The screenshot shows configuration preview with the example task registry; no benchmark result is simulated.
 

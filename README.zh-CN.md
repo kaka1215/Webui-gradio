@@ -18,7 +18,7 @@
 
 本仓库提供**界面与任务编排代码**。模型权重、数据集、攻击实现与评测后端需要自行接入。
 
-![六类评测与工作流程](docs/assets/overview.svg)
+![六类评测与工作流程](docs/assets/evaldeck-overview.svg)
 
 ## 六类评测
 
@@ -45,7 +45,7 @@
 <details open>
 <summary>界面预览</summary>
 
-![评测工作台](docs/assets/evaluation.png)
+![评测工作台](docs/assets/evaldeck-workspace.png)
 
 截图展示示例任务配置的 YAML 预览，不包含模拟的评测分数。
 
